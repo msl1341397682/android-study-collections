@@ -1,0 +1,12 @@
+# threadLocal的作用
+
+## 背景
+
+android开发接触最多的就是消息队列机制，与messageQueue相关的又关联了looper和handler等关联。其中messageQueue存储消息，looper管理messageQueue，不断地从中去消息，handler作为消息地处理者，它抛给handler的消息交由他处理。
+
+## 问题
+**面试中经常被问到，looper如何保证唯一性的，为什么在每个线程中创建的looper只有一个？**
+
+首先如果是单例来实现可以保证唯一性，但是这样无法做到每个线程中只有一个looper。这里的关键核心就是ThreadLocal这个类。首先每个looper能保证只有一个ThreadLocal（泛型类型为Looper），每个线程内部持有一个ThreadLocalMap对象，他支持为该线程持有一些私有的变量，ThreadLocalMap中又保存了指定泛型类型的ThreadLocal，通过这条链路映射起来了，每个线程中只有一个looper对象（looper第一次创建的时候把自己放到线程的threadLocalMap）
+
+其中handler创建的时候必须传looper，主线程不传looper对象是因为app主线程main方法调用的时候已经初始化好了，通过looper静态方法可以获取到当前线程中唯一的looper对象。
